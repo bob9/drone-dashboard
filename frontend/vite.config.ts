@@ -64,6 +64,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
 		build: {
 			sourcemap: true,
 			outDir: '../backend/static',
+			target: 'es2020',
 			// Optimize chunks
 			rollupOptions: {
 				output: {

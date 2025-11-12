@@ -3,11 +3,14 @@ import { type Column, GenericTable } from '../common/GenericTable.tsx';
 import type { PilotRaceLapGroup } from './pilot-state.ts';
 import { ChannelSquare } from '../common/ChannelSquare.tsx';
 import { StreamTimestampLink } from '../stream/StreamTimestampLink.tsx';
+// @ts-ignore - TanStack Router type issue, see https://github.com/denoland/deno/issues/30444
+import { Link } from '@tanstack/react-router';
 
 type SortMode = 'time' | 'chronological';
 
 interface PilotLapRow {
 	id: string;
+	raceId: string;
 	raceLabel: string;
 	raceOrder: number;
 	lapNumber: number;
@@ -87,9 +90,10 @@ const buildColumns = (): Array<Column<TableContext, PilotLapRow>> => [
 		minWidth: 180,
 		cell: ({ item }: { item: PilotLapRow }) => (
 			<div className='pilot-lap-race'>
-				<StreamTimestampLink timestampMs={item.timestampMs}>
+				{/* @ts-ignore - TanStack Router type issue, see https://github.com/denoland/deno/issues/30444 */}
+				<Link to='/races/$raceId' params={{ raceId: item.raceId }}>
 					{item.raceLabel}
-				</StreamTimestampLink>
+				</Link>
 			</div>
 		),
 	},
@@ -146,6 +150,7 @@ function flattenLapRows(groups: PilotRaceLapGroup[], bestLapSeconds: number | nu
 			const startTimestampMs = lap.startTimestampMs ?? lap.detectionTimestampMs ?? null;
 			rows.push({
 				id: lap.id,
+				raceId: group.race.id,
 				raceLabel: group.race.label,
 				raceOrder: group.race.order,
 				lapNumber: lap.lapNumber,

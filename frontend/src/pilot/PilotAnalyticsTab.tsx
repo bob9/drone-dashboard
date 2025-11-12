@@ -8,6 +8,8 @@ import type { PilotMetricSummary } from './pilot-hooks.ts';
 import type { PilotRaceLapGroup, PilotTimelineLap } from './pilot-state.ts';
 import { streamVideoRangesAtom } from '../state/pbAtoms.ts';
 import { buildStreamLinkForTimestamp, type StreamLink } from '../stream/stream-utils.ts';
+// @ts-ignore - TanStack Router type issue, see https://github.com/denoland/deno/issues/30444
+import { useNavigate } from '@tanstack/react-router';
 
 const overlayColors = {
 	bestLap: '#9ba3ff',
@@ -93,6 +95,7 @@ interface PilotAnalyticsTabProps {
 export function PilotAnalyticsTab(
 	{ timeline, lapGroups, metrics }: PilotAnalyticsTabProps,
 ) {
+	const navigate = useNavigate();
 	const [overlays, setOverlays] = useState<OverlayToggleState>({
 		bestLap: false,
 		consecutive: false,
@@ -277,6 +280,20 @@ export function PilotAnalyticsTab(
 		chart.dispatchAction({ type: 'dataZoom', dataZoomId: insideZoomId, start: 0, end: 100 });
 	};
 
+	const handleChartClick = (params: any) => {
+		// Only handle clicks on bars (not on overlays or other elements)
+		if (params.componentType === 'series' && params.seriesType === 'bar') {
+			const dataIndex = params.dataIndex;
+			if (dataIndex != null) {
+				const slot = chartStructure.slots[dataIndex];
+				if (slot?.lap?.raceId) {
+					// @ts-ignore - TanStack Router type issue
+					navigate({ to: '/races/$raceId', params: { raceId: slot.lap.raceId } });
+				}
+			}
+		}
+	};
+
 	if (lapPoints.length === 0) {
 		return <div className='pilot-empty-state'>No laps recorded yet.</div>;
 	}
@@ -328,6 +345,7 @@ export function PilotAnalyticsTab(
 						onReady={(chart) => {
 							chartInstanceRef.current = chart;
 						}}
+						events={{ click: handleChartClick }}
 						className='pilot-analytics-chart'
 					/>
 				</div>
