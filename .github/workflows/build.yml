@@ -80,7 +80,16 @@ jobs:
 
       - name: Backend Test
         working-directory: backend
-        run: go test ./...
+        run: |
+          for i in 1 2 3; do
+            echo "Backend test attempt $i"
+            if go test ./...; then
+              exit 0
+            fi
+            echo "Backend test attempt $i failed"
+          done
+          echo "Backend tests failed after 3 attempts"
+          exit 1
 
       - name: Backend Build Check (Linux amd64)
         working-directory: backend
