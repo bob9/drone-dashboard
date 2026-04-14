@@ -1,6 +1,8 @@
 name: Build and Release
 
 on:
+  push:
+    branches: [main]
   release:
     types: [created]
   workflow_dispatch:
@@ -77,7 +79,8 @@ jobs:
         run: go build -o /tmp/drone-dashboard-test ./...
 
   build-frontend:
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    needs: fast-checks
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -110,7 +113,7 @@ jobs:
 
   build-backend:
     needs: build-frontend
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -174,4 +177,36 @@ jobs:
             bin/drone-dashboard_linux_x86
             bin/drone-dashboard_linux_arm
             bin/drone-dashboard_mac_x86
-            bin/drone-dashboard_mac_arm 
+            bin/drone-dashboard_mac_arm
+
+  create-auto-release:
+    needs: build-backend
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries
+          path: bin
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "short=$(echo ${{ github.sha }} | cut -c1-7)" >> "$GITHUB_OUTPUT"
+
+      - name: Create Per-Commit Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: build-${{ steps.sha.outputs.short }}
+          name: Build ${{ steps.sha.outputs.short }}
+          prerelease: true
+          body: |
+            Automated build from commit ${{ github.sha }}.
+          files: |
+            bin/drone-dashboard.exe
+            bin/drone-dashboard_linux_x86
+            bin/drone-dashboard_linux_arm
+            bin/drone-dashboard_mac_x86
+            bin/drone-dashboard_mac_arm
