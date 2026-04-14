@@ -203,24 +203,50 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Download Binaries
         uses: actions/download-artifact@v4
         with:
           name: binaries
           path: bin
 
-      - name: Compute short SHA
-        id: sha
-        run: echo "short=$(echo ${{ github.sha }} | cut -c1-7)" >> "$GITHUB_OUTPUT"
+      - name: Compute next semver tag
+        id: version
+        run: |
+          last=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
+          if [ -z "$last" ]; then
+            next="v0.1.0"
+          else
+            ver=${last#v}
+            IFS='.' read -r major minor patch <<< "$ver"
+            patch=$((patch + 1))
+            next="v${major}.${minor}.${patch}"
+          fi
+          echo "tag=${next}" >> "$GITHUB_OUTPUT"
+          echo "Next tag: ${next}"
+
+      - name: Extract commit subject
+        id: commit
+        run: |
+          subject=$(git log -1 --pretty=%s ${{ github.sha }})
+          {
+            echo 'subject<<__END__'
+            echo "$subject"
+            echo '__END__'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Per-Commit Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: build-${{ steps.sha.outputs.short }}
-          name: Build ${{ steps.sha.outputs.short }}
-          prerelease: true
-          body: |
-            Automated build from commit ${{ github.sha }}.
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          prerelease: false
+          make_latest: 'true'
+          body: ${{ steps.commit.outputs.subject }}
           files: |
             bin/drone-dashboard.exe
             bin/drone-dashboard_linux_x86
