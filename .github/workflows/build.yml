@@ -34,10 +34,12 @@ jobs:
             ${{ runner.os }}-deno-
 
       - name: Frontend Verify (format, lint, type-check)
+        if: github.event_name != 'push'
         working-directory: frontend
         run: deno task verify
 
       - name: Frontend Test
+        if: github.event_name != 'push'
         working-directory: frontend
         run: deno task test
 
