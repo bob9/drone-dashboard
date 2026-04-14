@@ -131,23 +131,21 @@ func (m *Manager) processDueRow(rw dueRow) {
 	sid := rw.SourceID
 	// Resolve event sourceId from event relation id
 	eventSourceId := m.resolveEventSourceIdByPBID(rw.Event)
-	var runErr error
-	switch t {
-	case "event":
-		runErr = m.Service.IngestEventMeta(eventSourceId)
-	case "pilots":
-		runErr = m.Service.IngestPilots(eventSourceId)
-	case "channels":
-		runErr = m.Service.IngestChannels(eventSourceId)
-	case "rounds":
-		runErr = m.Service.IngestRounds(eventSourceId)
-	case "race":
-		runErr = m.Service.IngestRace(eventSourceId, sid)
-	case "results":
-		_, runErr = m.Service.IngestResults(eventSourceId)
-	default:
-		slog.Warn("scheduler.worker.unknownType", "type", t)
+	runErr := m.runIngest(t, eventSourceId, sid)
+
+	// Active race polling (200ms) is much faster than the rounds/pilots/channels
+	// cadence, so FPVTrackside can publish a Race.json referencing a round (or
+	// pilot/channel) we haven't ingested yet. Refresh the missing dependency
+	// inline and retry once so the dashboard keeps updating instead of backing
+	// off until the next scheduled poll.
+	if runErr != nil && t == "race" {
+		var missing *ingest.EntityNotFoundError
+		if errors.As(runErr, &missing) && m.refreshDependency(eventSourceId, missing.Collection) {
+			slog.Info("scheduler.worker.dependencyRefreshed", "type", t, "sourceId", sid, "event", rw.Event, "collection", missing.Collection, "missingSourceId", missing.SourceID)
+			runErr = m.runIngest(t, eventSourceId, sid)
+		}
 	}
+
 	if runErr != nil {
 		var missing *ingest.EntityNotFoundError
 		if errors.As(runErr, &missing) {
@@ -162,6 +160,46 @@ func (m *Manager) processDueRow(rw dueRow) {
 		}
 	}
 	m.rescheduleRow(rw.ID, rw.IntervalMs, runErr)
+}
+
+func (m *Manager) runIngest(t, eventSourceId, sid string) error {
+	switch t {
+	case "event":
+		return m.Service.IngestEventMeta(eventSourceId)
+	case "pilots":
+		return m.Service.IngestPilots(eventSourceId)
+	case "channels":
+		return m.Service.IngestChannels(eventSourceId)
+	case "rounds":
+		return m.Service.IngestRounds(eventSourceId)
+	case "race":
+		return m.Service.IngestRace(eventSourceId, sid)
+	case "results":
+		_, err := m.Service.IngestResults(eventSourceId)
+		return err
+	default:
+		slog.Warn("scheduler.worker.unknownType", "type", t)
+		return nil
+	}
+}
+
+func (m *Manager) refreshDependency(eventSourceId, collection string) bool {
+	var err error
+	switch collection {
+	case "rounds":
+		err = m.Service.IngestRounds(eventSourceId)
+	case "pilots":
+		err = m.Service.IngestPilots(eventSourceId)
+	case "channels":
+		err = m.Service.IngestChannels(eventSourceId)
+	default:
+		return false
+	}
+	if err != nil {
+		slog.Warn("scheduler.worker.dependencyRefresh.error", "collection", collection, "event", eventSourceId, "err", err)
+		return false
+	}
+	return true
 }
 
 // rescheduleRow updates scheduling fields using the DAO to ensure subscriptions trigger.
