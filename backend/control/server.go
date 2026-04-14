@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	serverPingInterval = 30 * time.Second
+	serverPingInterval = 15 * time.Second
 	serverReadTimeout  = 60 * time.Second
 )
 
@@ -81,6 +81,10 @@ func serveConn(c *Conn, hub *Hub) {
 	// On connect, send hello
 	_ = c.SendJSON(NewEnvelope(TypeHello, "", Hello{ProtocolVersion: 1, ServerTimeMs: time.Now().UnixMilli()}))
 	slog.Debug("control.server.hello_sent", "pitsId", c.PitsID)
+
+	// Prime the return path so intermediaries with short idle timeouts don't
+	// tear down the tunnel before the first ticker-driven ping fires.
+	_ = c.SendJSON(NewEnvelope(TypePing, "", nil))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

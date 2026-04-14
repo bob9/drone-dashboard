@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	clientPingInterval = 30 * time.Second
+	clientPingInterval = 15 * time.Second
 	clientReadTimeout  = 60 * time.Second
 )
 
