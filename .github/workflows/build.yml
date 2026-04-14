@@ -68,6 +68,12 @@ jobs:
             exit 1
           fi
 
+      - name: Seed static embed placeholder
+        working-directory: backend
+        run: |
+          mkdir -p static
+          [ -f static/.placeholder ] || echo "placeholder for //go:embed static/*" > static/.placeholder
+
       - name: Backend Vet
         working-directory: backend
         run: go vet ./...
