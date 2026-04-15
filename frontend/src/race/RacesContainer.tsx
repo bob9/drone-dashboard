@@ -6,14 +6,18 @@ import { NextRaceCompact } from './NextRaceCompact.tsx';
 import { nextRaceEntriesAtom } from './next-race-entries.ts';
 import { RaceNumber } from './RaceNumber.tsx';
 import { FinalsRacePanel } from './FinalsRacePanel.tsx';
+import { computeRaceStatus } from './race-types.ts';
 
 export function RacesContainer() {
 	const currentRace = useAtomValue(currentRaceAtom);
-	const lastRace = useAtomValue(lastRaceAtom);
+	const rawLastRace = useAtomValue(lastRaceAtom);
 	const nextRaces = useAtomValue(nextRaceEntriesAtom);
 
-	// Hide current race when there's only one race and it matches the last race
-	const showCurrentRace = !!currentRace && !(lastRace && currentRace.id === lastRace.id);
+	// If the current race has been stopped (ended), surface it as the "last race"
+	// and hide the current-race panel until the next race starts.
+	const currentRaceEnded = currentRace ? computeRaceStatus(currentRace).isCompleted : false;
+	const lastRace = currentRaceEnded ? currentRace : rawLastRace;
+	const showCurrentRace = !!currentRace && !currentRaceEnded && !(lastRace && currentRace.id === lastRace.id);
 
 	return (
 		<div className='races-container'>
