@@ -22,6 +22,8 @@ import { type Column, GenericTable } from '../common/GenericTable.tsx';
 import { OverflowFadeCell } from '../common/OverflowFadeCell.tsx';
 import { EventType } from '../api/pbTypes.ts';
 import { raceBracketSlotsAtom } from '../bracket/eliminationState.ts';
+import { useBreakpoint } from '../responsive/useBreakpoint.ts';
+import { LapsCardView } from './LapsCardView.tsx';
 
 const POSITION_POINTS: Record<number, number> = {};
 
@@ -31,8 +33,13 @@ interface LapsViewProps {
 
 export function LapsView({ raceId }: LapsViewProps) {
 	const race = useAtomValue(raceDataAtom(raceId));
+	const { isMobile } = useBreakpoint();
 
 	if (!race) return null;
+
+	if (isMobile) {
+		return <LapsCardView raceId={raceId} />;
+	}
 
 	return (
 		<div className='laps-view'>

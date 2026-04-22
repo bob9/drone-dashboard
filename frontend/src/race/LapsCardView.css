@@ -1,0 +1,139 @@
+.laps-cards {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 4px;
+}
+
+.pilot-card {
+	background: var(--table-bg-odd, #1a1a1a);
+	border: 1px solid #333;
+	border-radius: 8px;
+	padding: 8px 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.pilot-card.favorite {
+	background: linear-gradient(135deg, rgba(155, 163, 255, 0.12) 0%, rgba(155, 163, 255, 0.04) 100%);
+	border-color: rgba(155, 163, 255, 0.25);
+}
+
+.pilot-card.predicted {
+	background: rgba(148, 163, 184, 0.12);
+	font-style: italic;
+	color: rgba(226, 232, 240, 0.9);
+}
+
+.pilot-card-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 28px;
+}
+
+.pilot-card-pos {
+	font-weight: 700;
+	font-size: 1rem;
+	color: #ddd;
+	min-width: 32px;
+}
+
+.pilot-card-name {
+	flex: 1;
+	font-weight: 600;
+	font-size: 0.95rem;
+	color: #e2e8f0;
+	text-decoration: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+a.pilot-card-name:hover {
+	color: #fff;
+	text-decoration: underline;
+}
+
+.pilot-card-channel {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.85rem;
+	color: #888;
+	flex-shrink: 0;
+}
+
+.pilot-card-laps {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.lap-badge {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 52px;
+	padding: 3px 6px;
+	border-radius: 6px;
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lap-badge-label {
+	font-size: 0.65rem;
+	text-transform: uppercase;
+	color: #888;
+	letter-spacing: 0.5px;
+	line-height: 1;
+	margin-bottom: 1px;
+}
+
+.lap-badge-value {
+	font-size: 0.85rem;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	color: #e2e8f0;
+}
+
+.total-badge {
+	background: rgba(255, 255, 255, 0.1);
+	border-color: rgba(255, 255, 255, 0.15);
+}
+
+.total-badge .lap-badge-value {
+	font-weight: 700;
+}
+
+/* Lap highlighting on badges — reuse the same color vars from LapsView */
+.lap-badge.lap-fastest-overall {
+	background-color: var(--fastest-lap-color, #1a472a);
+	border-color: rgba(26, 71, 42, 0.6);
+}
+
+.lap-badge.lap-personal-best {
+	background-color: var(--personal-best-color, #2a2a4a);
+	border-color: rgba(42, 42, 74, 0.6);
+}
+
+.lap-badge.lap-overall-fastest {
+	background-color: var(--overall-fastest-color, #4a1a1a);
+	border-color: rgba(74, 26, 26, 0.6);
+}
+
+.lap-badge.lap-overall-personal-best {
+	background-color: var(--overall-personal-best-color, #1a1a4a);
+	border-color: rgba(26, 26, 74, 0.6);
+}
+
+.lap-badge.pattern-hatched {
+	background-image: repeating-linear-gradient(
+		45deg,
+		transparent,
+		transparent 3px,
+		rgba(255, 255, 255, 0.04) 3px,
+		rgba(255, 255, 255, 0.04) 6px
+	);
+}
