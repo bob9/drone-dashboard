@@ -196,7 +196,7 @@ function useLapsTableColumns(
 				key: 'name',
 				header: 'Name',
 				label: 'Pilot',
-				minWidth: 64,
+				width: 180,
 				cell: PilotNameCell,
 			},
 			{
