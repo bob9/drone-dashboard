@@ -14,6 +14,7 @@
 
 import { Route as rootRouteImport } from './routes/__root.tsx'
 import { Route as SettingsRouteImport } from './routes/settings.tsx'
+import { Route as RacesRouteImport } from './routes/races.tsx'
 import { Route as LoginRouteImport } from './routes/login.tsx'
 import { Route as AdminRouteImport } from './routes/admin.tsx'
 import { Route as IndexRouteImport } from './routes/index.tsx'
@@ -29,6 +30,11 @@ import { Route as AdminControlRouteImport } from './routes/admin/control.tsx'
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RacesRoute = RacesRouteImport.update({
+  id: '/races',
+  path: '/races',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/races': typeof RacesRoute
   '/settings': typeof SettingsRoute
   '/admin/control': typeof AdminControlRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/races': typeof RacesRoute
   '/settings': typeof SettingsRoute
   '/admin/control': typeof AdminControlRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/races': typeof RacesRoute
   '/settings': typeof SettingsRoute
   '/admin/control': typeof AdminControlRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/login'
+    | '/races'
     | '/settings'
     | '/admin/control'
     | '/admin/dashboard'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/races'
     | '/settings'
     | '/admin/control'
     | '/admin/dashboard'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/login'
+    | '/races'
     | '/settings'
     | '/admin/control'
     | '/admin/dashboard'
@@ -177,6 +189,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
+  RacesRoute: typeof RacesRoute
   SettingsRoute: typeof SettingsRoute
   PilotsPilotIdRoute: typeof PilotsPilotIdRoute
 }
@@ -209,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/races': {
+      id: '/races'
+      path: '/races'
+      fullPath: '/races'
+      preLoaderRoute: typeof RacesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -296,6 +316,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
+  RacesRoute: RacesRoute,
   SettingsRoute: SettingsRoute,
   PilotsPilotIdRoute: PilotsPilotIdRoute,
 }

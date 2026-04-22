@@ -416,6 +416,37 @@ export const lastRaceAtom = atom((get): PBRaceRecord | null => {
 });
 
 /**
+ * Last N races (up to 3) - races with raceOrder < current order, sorted descending
+ */
+export const lastRacesAtom = atom((get): PBRaceRecord[] => {
+	const races = get(allRacesAtom);
+	const kv = get(currentOrderKVAtom);
+
+	if (!races || races.length === 0 || !kv?.order) {
+		return [];
+	}
+
+	return races
+		.filter((r) => r.raceOrder && r.raceOrder < kv.order!)
+		.sort((a, b) => b.raceOrder - a.raceOrder)
+		.slice(0, 3);
+});
+
+/**
+ * All completed races for the current event, sorted by raceOrder descending (most recent first)
+ */
+export const completedRacesAtom = atom((get): PBRaceRecord[] => {
+	const races = get(allRacesAtom);
+	return races
+		.filter((r) => {
+			const hasStarted = !!(r.start && !r.start.startsWith('0'));
+			const hasEnded = !!(r.end && !r.end.startsWith('0'));
+			return hasStarted && hasEnded;
+		})
+		.sort((a, b) => b.raceOrder - a.raceOrder);
+});
+
+/**
  * Next races atom - returns the next 8 races based on current order from KV store
  * Uses the order field from currentOrderKVAtom to find races with higher raceOrder values
  */
