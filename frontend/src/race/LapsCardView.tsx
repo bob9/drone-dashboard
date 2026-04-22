@@ -111,14 +111,14 @@ function PilotCard({ raceId, pilotChannel, position, isPredicted, displayName, c
 		<div className={cardClass}>
 			<div className='pilot-card-header'>
 				<span className='pilot-card-pos'>{getPositionWithSuffix(position)}</span>
-				{pilot ? (
-					// @ts-ignore - TanStack Router type issue
-					<Link to='/pilots/$pilotId' params={{ pilotId: pilot.sourceId }} className='pilot-card-name'>
-						{name}
-					</Link>
-				) : (
-					<span className='pilot-card-name'>{name}</span>
-				)}
+				{pilot
+					? (
+						// @ts-ignore - TanStack Router type issue
+						<Link to='/pilots/$pilotId' params={{ pilotId: pilot.sourceId }} className='pilot-card-name'>
+							{name}
+						</Link>
+					)
+					: <span className='pilot-card-name'>{name}</span>}
 				<span className='pilot-card-channel'>
 					{chanLabel}
 					{pilotChannel.channelId ? <ChannelSquare channelID={pilotChannel.channelId} /> : null}
@@ -161,7 +161,18 @@ function PilotCard({ raceId, pilotChannel, position, isPredicted, displayName, c
 
 interface LapBadgeProps {
 	label: string;
-	lap: { id: string; lengthSeconds: number; isHoleshot: boolean; pilotId: string; lapNumber: number; valid: boolean; startTime: string; endTime: string; detectionId: string; detectionTime: string };
+	lap: {
+		id: string;
+		lengthSeconds: number;
+		isHoleshot: boolean;
+		pilotId: string;
+		lapNumber: number;
+		valid: boolean;
+		startTime: string;
+		endTime: string;
+		detectionId: string;
+		detectionTime: string;
+	};
 	overallBestTimes: { overallFastestLap: number; pilotBestLaps: Map<string, number> };
 	pilotId: string;
 	fastestRaceLap: number;
