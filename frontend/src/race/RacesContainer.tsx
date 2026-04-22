@@ -29,6 +29,21 @@ export function RacesContainer() {
 	return (
 		<div className='races-container'>
 			<FinalsRacePanel />
+			{showCurrentRace && (
+				<div className='race-box current-race'>
+					<div className='race-header'>
+						<h3>Current Race</h3>
+						<RaceNumber raceId={currentRace.id} />
+						<div className='race-timer'>
+							<RaceTime />
+						</div>
+					</div>
+					<LapsView
+						key={currentRace.id}
+						raceId={currentRace.id}
+					/>
+				</div>
+			)}
 			{lastRaces.map((race, idx) => (
 				<div key={race.id} className='race-box last-race'>
 					<div className='race-header'>
@@ -47,21 +62,6 @@ export function RacesContainer() {
 					<Link to='/races' className='race-history-link'>
 						View All Races &rarr;
 					</Link>
-				</div>
-			)}
-			{showCurrentRace && (
-				<div className='race-box current-race'>
-					<div className='race-header'>
-						<h3>Current Race</h3>
-						<RaceNumber raceId={currentRace.id} />
-						<div className='race-timer'>
-							<RaceTime />
-						</div>
-					</div>
-					<LapsView
-						key={currentRace.id}
-						raceId={currentRace.id}
-					/>
 				</div>
 			)}
 			<div className='race-box next-races'>
